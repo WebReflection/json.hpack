@@ -21,7 +21,7 @@ $name = $info['name'];
 $output = $info['file'];
 // -- simple build
 $file = 'build/'.$name.'.js';
-$filemin = str_replace('.js', '.min.js', $file);
+$filemin = preg_replace('/\.js$/', '.min.js', $file);
 if(!function_exists('file_put_contents')){
     function file_put_contents($file, $content){
         $fp = fopen($file, 'wb');

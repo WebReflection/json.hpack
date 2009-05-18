@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<!--
+/** JSON.hpack simple test suite
+ * @author      Andrea Giammarchi
+ * @license     Mit Style License
+ * @blog        http://webreflection.blogspot.com/
+ * @project     http://code.google.com/p/vice-versa/
+ * @version     0.20090421193521
+ */
+-->
+<html>
+    <head>
+        <title>JSON.hpack :: Homogeneous Collection Packer</title>
+        <style type="text/css">
+        html, body {
+            padding: 0;
+            margin: 0;
+            width: 100%;
+            height: 100%;
+        }
+        div {
+            font-family: "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Verdana, Tahoma, sans-serif;
+            font-weight: normal;
+            width: 49%;
+            height: 100%;
+            float: left;
+            padding: 0;
+            overflow: auto;
+        }
+        * {
+            font-size: 9pt;
+        }
+        textarea {
+            height: 90%;
+        }
+        button {
+            height: 10%;
+        }
+        textarea, button {
+            width: 100%;
+            float: left;
+            margin: 0;
+            padding: 0;
+            border: 0;
+        }
+        pre {
+            border-top: 1px dotted silver;
+            padding-left: 2px;
+            overflow: auto;
+        }
+        </style>
+        <script type="text/javascript">if(!this.JSON)document.write('<'.concat('script type="text/javascript" src="http://www.json.org/json2.js"><', '/script', '>'));</script>
+        <script type="text/javascript">(function(p){document.write('<'.concat('script type="text/javascript" src="', -1 < location.href.indexOf("?build") ? "../build.php" : "../build/" + p + ".min.js", '"><', '/script', '>'))})
+        ("json.hpack");
+        </script>
+        <script type="text/javascript" src="http://vice-versa.googlecode.com/svn/trunk/build/vice-versa.min.js"></script>
+        <script type="text/javascript">
+        attachEvent("onload", function(){
+            function bench(callback, time){
+                for(var
+                    result  = {all:[]},
+                    i       = 0,
+                    length  = time || 12;
+                    i < length; ++i
+                ){
+                    time = new Date;
+                    callback();
+                    time = new Date - time;
+                    result.all.push(time);
+                };
+                result.max = Math.max.apply(null, result.all);
+                result.min = Math.min.apply(null, result.all);
+                if(length < 3)
+                    result.avg = ((result.max + result.min) / 2).toFixed(2);
+                else {
+                    i = 0;
+                    while(length)
+                        i += result.all[--length];
+                    i -= result.max + result.min;
+                    i /= result.all.length - 2;
+                    result.avg = i.toFixed(2);
+                };
+                return result;
+            };
+            function cursor(cursor) {
+                var i = 0,
+                    length = cursor.length - 1;
+                return {
+                    curr: function() { return cursor[i] },
+                    next: function() { return cursor[i < length ? ++i : i = 0] },
+                    prev: function() { return cursor[0 < i ? --i : i = length] }
+                }
+            };
+            function size(bytes){
+                var i = 0;
+                while(1024 < bytes){
+                    bytes /= 1024;
+                    ++i;
+                };
+                return bytes.toFixed(2) + " " + ["bytes", "Kb", "Mb", "Gb"][i];
+            };
+            function gzip(s){
+                var xhr = new XMLHttpRequest;
+                xhr.open("POST", "../gzip.php?" + Math.random(), false);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                xhr.send("data=" + encodeURIComponent(s));
+                return /^[0-9]+$/.test(xhr.responseText) ? size(xhr.responseText >> 0) : "unknown: greater than max allowed post data";
+            };
+            function test(which){
+                switch(which++) {
+                    case    0:
+                        var b = bench(function(){original = JSON.stringify(a)}, 5);
+                        panel.innerHTML += '<pre>' + original + '</pre>';
+                        panel.innerHTML += '<pre>Array to JSON String           : ' + b.avg + ' milliseconds</pre>';
+                        setTimeout(function(){
+                        b = 
+                        convertionTime = new Date - convertionTime;
+                        panel.innerHTML += '<pre>JSON String to Array           : ' + bench(function(){var o=Function("return " + original)()}, 5).avg + ' milliseconds</pre>';
+                        setTimeout(function(){
+                        panel.innerHTML += '<pre>JSON String length             : ' + original.length + '</pre>';
+                        panel.innerHTML += '<pre>JSON String gzip               : ' + gzip(original) + '</pre>';
+                        setTimeout(test, delay, which);
+                        }, delay);
+                        }, delay);
+                        break;
+                    default:
+                        if(which === 2){
+                            var convertionTime = new Date;
+                            var comp = JSON.hbest(a);
+                            convertionTime = new Date - convertionTime;
+                            panel.innerHTML += '<h1>JSON.hpack best compression level is ' + comp + '</h1>';
+                            panel.innerHTML += '<pre>' + convertionTime + ' ms to retrieve the best option (one time operation)</pre>';
+                        } else if(which === 7)
+                            return button.disabled = false;
+                        var comp = which - 2;
+                        panel.innerHTML += "<h1>JSON.hpack compression level " + (comp === 4 ? " 4 as \"best option\"" : comp) + " test</h1>";
+                        var convertionTime = new Date;
+                        var json = JSON.stringify(JSON.hpack(a, comp));
+                        convertionTime = new Date - convertionTime;
+                        panel.innerHTML += '<pre>' + json + '</pre>';
+                        panel.innerHTML += '<pre>Array to JSON String via hpack: ' + convertionTime + ' milliseconds</pre>';
+                        setTimeout(function(){
+                        convertionTime = new Date;
+                        var o = JSON.hunpack(JSON.hclone(Function("return " + json)()));
+                        convertionTime = new Date - convertionTime;
+                        panel.innerHTML += '<pre>JSON String via hpack to Array : ' + convertionTime + ' milliseconds</pre>';
+                        setTimeout(function(){
+                        panel.innerHTML += '<pre>JSON String via hpack length   : ' + json.length + '</pre>';
+                        panel.innerHTML += '<pre>JSON String via hpack gzip     : ' + gzip(json) + '</pre>';
+                        setTimeout(function(){
+                        panel.innerHTML += '<pre>were hpack/hunpack reliable    : ' + (JSON.stringify(o) === original) + '</pre>';
+                        setTimeout(test, delay, which);
+                        }, delay);
+                        }, delay);
+                        }, delay);
+                        break;
+                };
+            };
+            var textarea= document.query("textarea")[0],
+                panel   = document.query("div")[1],
+                button  = document.query("button")[0],
+                delay   = 250,
+                a, original
+            ;
+            panel.style.borderLeft = "1px solid silver";
+            button.disabled = false;
+            button.attachEvent("onclick", function(){
+                event.srcElement.disabled = true;
+                try {
+                    a = event._value || Function("return " + textarea.value)();
+                    if(a instanceof Array && a.every(function(v){return v instanceof Object})){
+                        panel.innerHTML = "<h1>JSON test [homogeneous collection length: " + a.length + "]</h1>";
+                        setTimeout(test, 100, 0);
+                    } else
+                        throw new Error("It does not seem an homogeneous collection");
+                } catch(e) {
+                    panel.innerHTML = e.message;
+                    button.disabled = false;
+                };
+            });
+            detachEvent("onload", arguments.callee);
+            big = function(){
+                var xhr     = new XMLHttpRequest,
+                    value   = textarea.value,
+                    anim    = cursor(["-", "\\", "|", "/"]),
+                    interval= setInterval(function(){
+                        textarea.value = "[" + anim.next() + "] Retrieving 5000 homogeneous collection";
+                    }, 100);
+                xhr.open("GET", "5000.txt", true);
+                xhr.onreadystatechange = function(){
+                    if(xhr.readyState === 4){
+                        clearInterval(interval);
+                        textarea.style.display = "none";
+                        textarea.value = xhr.responseText;
+                        button.fireEvent("onclick");
+                        textarea.value = value;
+                        textarea.style.display = "";
+                    }
+                };
+                xhr.send(null);
+                return false;
+            };
+            setInterval(function(){
+                document.body.style.height = document.documentElement.clientHeight + "px";
+            }, 5000);
+        });
+        </script>
+    </head>
+    <body>
+        <div><textarea></textarea><button>go</button></div>
+        <div>Write an homogeneous collection to start the test (as example)
+        <pre style="cursor:pointer;" onclick="document.query('textarea')[0].value=this.innerText;return false">[{name:"Andrea", age:31, gender:"Male", skilled:true}, {name:"Eva", age:27, gender:"Female", skilled:true}, {name:"Daniele", age:26, gender:"Male", skilled:false}]</pre>
+        or run <a href="#big" onclick="return window[this.href.split('#')[1]]();">5000 rows array</a> test</div>
+    </body>
+</html>

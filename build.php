@@ -1,16 +1,24 @@
 <?php
-$time = microtime(true);
+$time   = microtime(true);
+$info   = parse_ini_file('config.ini');
+$mklen  = 0;
 $cl = '
-/** version 1.0 2009-05-14
- * @author      Andrea Giammarchi
- * @license     Mit Style License
- * @project     http://code.google.com/p/hpack/
+/** '.$info['name'];
+foreach($info as $key => $value){
+    if($key !== 'name' && $key !== 'file')
+        $mklen = max($mklen, strlen($key));
+}
+++$mklen;
+foreach($info as $key => $value){
+    if($key !== 'name' && $key !== 'file')
+        $cl .= '
+ * @'.str_pad($key, $mklen).$value;
+}
+$cl .= '
  */
 ';
-$name = 'json.hpack';
-$output = array(
-    'json.hpack'
-);
+$name = $info['name'];
+$output = $info['file'];
 // -- simple build
 $file = 'build/'.$name.'.js';
 $filemin = str_replace('.js', '.min.js', $file);

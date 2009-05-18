@@ -1,6 +1,6 @@
 <?php
 
-/** json.hpack for PHP
+/** json.hpack for PHP (4/5)
  * @description JSON Homogeneous Collection Packer
  * @version     1.0.1
  * @author      Andrea Giammarchi
@@ -110,11 +110,13 @@ function json_hunpack($collection){
         $len    = count($header),
         $length = count($collection),
         $i      = 0,
+        $k      = 0,
         $l      = 0;
         $i < $len; ++$i
     ){
         $keys[] = $header[$i];
-        if(is_array($header[$i + 1])){
+        $k = $i + 1;
+        if($k < $len && is_array($header[$k])){
             ++$i;
             for($j = 1; $j < $length; ++$j){
                 $row = &$collection[$j];

@@ -51,7 +51,24 @@ function json_hpack($collection, $compression = 0){
                 }
             }
         }
-        if(1 < $compression){
+        if(2 < $compression){
+            for($j = 0; $j < $len; ++$j){
+                if(is_array($header[$j])){
+                    for($row = $header[$j][1], $value = array(), $first = array(), $k = 0, $i = 1; $i < $index; ++$i){
+                        $value[$k] = $row[$first[$k] = $result[$i][$j]];
+                        ++$k;
+                    }
+                    if(strlen(json_encode($value)) < strlen(json_encode(array_merge($first, $row)))){
+                        for($k = 0, $i = 1; $i < $index; ++$i){
+                            $result[$i][$j] = $value[$k];
+                            ++$k;
+                        }
+                        $header[$j] = $header[$j][0];
+                    }
+                }
+            }
+        }
+        elseif(1 < $compression){
             $length -= floor($length / 2);
             for($j = 0; $j < $len; ++$j){
                 if(is_array($header[$j])){
@@ -59,24 +76,6 @@ function json_hpack($collection, $compression = 0){
                         for($i = 1; $i < $index; ++$i){
                             $value = $result[$i][$j];
                             $result[$i][$j] = $first[$value];
-                        }
-                        $header[$j] = $header[$j][0];
-                    }
-                }
-            }
-        }
-        if(2 < $compression){
-            $length = count($result);
-            for($j = 0; $j < $len; ++$j){
-                if(is_array($header[$j])){
-                    for($row = $header[$j][1], $value = array(), $first = array(), $k = 0, $i = 1; $i < $length; ++$i){
-                        $value[$k] = $row[$first[$k] = $result[$i][$j]];
-                        ++$k;
-                    }
-                    if(strlen(json_encode($value)) < strlen(json_encode(array_merge($first, $row)))){
-                        for($k = 0, $i = 1; $i < $length; ++$i){
-                            $result[$i][$j] = $value[$k];
-                            ++$k;
                         }
                         $header[$j] = $header[$j][0];
                     }
